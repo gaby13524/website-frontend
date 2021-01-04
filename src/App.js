@@ -12,50 +12,51 @@ import ContactUs from "./components/ContactUs";
 import FAQ from "./components/FAQ";
 import Header from "./components/Header/Header";
 import { api } from "./store";
-import { Component } from "react";
 import classPage from "./components/classPage/classPage";
 import ScrollToTop from "./components/ScrollToTop";
+import { connect } from "react-redux";
 
-class App extends Component {
-  render() {
-    const l = api.book.read();
-    console.log(l);
-    const routes = [
-      { path: "/category/:name", as: Category },
-      {
-        path: "/book/:id",
-        as: (props) => {
-          const id = props.location.state.id;
-          return Book(MOCK_DATA[id - 1]);
-        },
+function App(props) {
+  const { books } = props;
+  const routes = [
+    { path: "/category/:name", as: Category },
+    {
+      path: "/book/:id",
+      as: (props) => {
+        const id = props.match.params.id;
+        return <Book data={books[id] ? books[id] : MOCK_DATA[id - 1]}></Book>;
       },
-      { path: "/", as: <FrontPage /> },
-      { path: "/about-us", as: AboutUs },
-      { path: "/contact-us", as: ContactUs },
-      { path: "/my-classes", as: classPage },
-      { path: "/setting", as: AccountSetting },
-      { path: "/profile", as: Profile },
-      { path: "/questions", as: FAQ },
-    ];
+    },
+    { path: "/", as: <FrontPage /> },
+    { path: "/about-us", as: AboutUs },
+    { path: "/contact-us", as: ContactUs },
+    { path: "/my-classes", as: classPage },
+    { path: "/setting", as: AccountSetting },
+    { path: "/profile", as: Profile },
+    { path: "/questions", as: FAQ },
+  ];
 
-    return (
-      <>
-        <Header />
-        <ScrollToTop>
-          <Switch>
-            {routes.map(({ path, as }) => {
-              return (
-                <Route key={path} path={path} exact>
-                  {as}
-                </Route>
-              );
-            })}
-          </Switch>
-        </ScrollToTop>
-        <Footer />
-      </>
-    );
-  }
+  return (
+    <>
+      <Header />
+      <ScrollToTop>
+        <Switch>
+          {routes.map(({ path, as, index }) => {
+            return (
+              <Route key={index} path={path} exact>
+                {as}
+              </Route>
+            );
+          })}
+        </Switch>
+      </ScrollToTop>
+      <Footer />
+    </>
+  );
 }
 
-export default App;
+function mapStateToProps(state, props) {
+  return { categories: state.category, books: state.book, ...props };
+}
+
+export default connect(mapStateToProps)(App);
